@@ -7,15 +7,36 @@ const apiBaseUrl = 'http://api.themoviedb.org/3';
 const nowPlayingUrl = `${apiBaseUrl}/movie/now_playing?api_key=${apiKey}`;
 const imageBaseUrl = 'http://image.tmdb.org/t/p/w300';
 
+router.use((req, res, next) => {
+  res.locals.imageBaseUrl = imageBaseUrl;
+  next();
+});
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   request.get(nowPlayingUrl, (err, response, movieData) => {
     // console.log('The error', err);
     // console.log((' ==== the response ===', response));
     const parsedData = JSON.parse(movieData);
-    console.log(parsedData);
+
+    // to get data in json
+    // res.json(parsedData);
+
+    res.render('index', {
+      parsedData: parsedData.results
+    });
   });
-  res.render('index', {});
+});
+
+router.get('/movie/:id', (req, res, next) => {
+  // res.json(req.params.id);
+  const movieId = req.params.id;
+  const thisMovieUrl = `${apiBaseUrl}/movie/${movieId}?api_key=${apiKey}`;
+  // res.send(thisMovieUrl);
+  request.get(thisMovieUrl, (err, response, movieData) => {
+    const parsedData = JSON.parse(movieData);
+    res.render('single-movie', { parsedData });
+  });
 });
 
 module.exports = router;
